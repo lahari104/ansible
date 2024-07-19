@@ -61,11 +61,11 @@
 
     - name: Changing ownership of /opt/tomcat folder to tomcat
       ansible.builtin.file:
-        path: /opt/tomcat
+        path: /opt/tomcat/*
         recurse: yes
         owner: tomcat
         group: tomcat
-        mode: 777
+        mode: 666
 
     - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
       ansible.builtin.file:
@@ -73,8 +73,3 @@
         mode: "+X"
       with_fileglob:
         - /opt/tomcat/latest/bin/*.sh
-    
-
-
-
-      
