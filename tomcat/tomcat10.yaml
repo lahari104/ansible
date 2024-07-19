@@ -1,0 +1,79 @@
+# 1  sudo apt update
+# 2  sudo apt install openjdk-11-jdk -y
+# 3  sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
+# 4  wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz
+# 4  wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+# 5  sudo tar -xzvf apache-tomcat-10.1.26.tar.gz -C /opt/tomcat/
+# 5  sudo tar -xzvf apache-tomcat-9.0.65.tar.gz -C /opt/tomcat/
+# 6  cd /opt/tomcat
+# 7  sudo ln -s apache-tomcat-9.0.65 /opt/tomcat/latest
+# 7  sudo ln -s apache-tomcat-10.1.26 /opt/tomcat/latest
+# 8  sudo chown -R tomcat: /opt/tomcat
+# 9  sudo sh -c 'chmod +x /opt/tomcat/latest/bin/*.sh'
+# 10  sudo vi /etc/systemd/system/tomcat.service
+# 11  sudo systemctl daemon-reload
+# 12  sudo systemctl enable --now tomcat
+# 13  sudo systemctl start tomcat
+# 14  sudo systemctl status tomcat
+# 15  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
+# 16  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
+# 17  sudo vi /opt/tomcat/latest/webapps/manager/META-INF/context.xml
+# 18  sudo vi /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
+# 19  sudo systemctl restart tomcat
+
+
+---
+- name: Installing tomcat10 in Ubuntu-22.04
+  hosts: all
+  become: yes
+  tasks:
+    - name: Installing Java-11
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        update_cache: yes
+        state: present
+    
+    - name: Creating a User in /bin/false
+      ansible.builtin.user:
+        name: tomcat
+        home: /opt/tomcat
+        shell: /bin/false
+        create_home: yes
+    
+    - name: Downloading tomcat-10 tar file
+      ansible.builtin.get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+        dest: .
+    
+    - name: Extracting the tomcat tar file in /opt/tomcat ditectory
+      ansible.builtin.unarchive:
+        dest: /opt/tomcat
+        src: ./apache-tomcat-10.1.26.tar.gz
+        remote_src: yes
+    
+    - name: Creating symbolic link
+      ansible.builtin.file:
+        src: apache-tomcat-10.1.26
+        dest: /opt/tomcat/latest
+        owner: tomcat
+        group: tomcat
+        state: link
+
+    - name: Changing ownership of /opt/tomcat folder to tomcat
+      ansible.builtin.file:
+        path: /opt/tomcat
+        recurse: yes
+        owner: tomcat
+        group: tomcat
+
+    - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: "+X"
+        with_fileglob:
+          - /opt/tomcat/latest/bin/*.sh
+    
+
+
+
+      
