@@ -85,8 +85,8 @@
     
     - name: Creating symbolic link
       ansible.builtin.file:
-        src: "{{ tomcat_home_path }}"/"{{ tomcat_extracted_file }}"
-        dest: "{{ tomcat_home_path }}"/latest
+        src: "{{ tomcat_home_path }}/{{ tomcat_extracted_file }}"
+        dest: "{{ tomcat_home_path }}/latest"
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
         state: link
