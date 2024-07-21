@@ -1,0 +1,144 @@
+# 1  sudo apt update
+# 2  sudo apt install openjdk-11-jdk -y
+# 3  sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
+# 4  wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+# 5  sudo tar -xzvf apache-tomcat-10.1.26.tar.gz -C /opt/tomcat/
+# 6  cd /opt/tomcat
+# 7  sudo ln -s apache-tomcat-10.1.26 /opt/tomcat/latest
+# 8  sudo chown -R tomcat: /opt/tomcat
+# 9  sudo sh -c 'chmod +x /opt/tomcat/latest/bin/*.sh'
+# 10  sudo vi /etc/systemd/system/tomcat.service
+# 11  sudo systemctl daemon-reload
+# 12  sudo systemctl enable --now tomcat
+# 13  sudo systemctl start tomcat
+# 14  sudo systemctl status tomcat
+# 15  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
+
+# <tomcat-users>
+# <!--
+#     Comments
+# -->
+#    <role rolename="admin-gui"/>
+#    <role rolename="manager-gui"/>
+#    <user username="admin" password="tomcat_admin_password" roles="admin-gui,manager-gui"/>
+# </tomcat-users>
+
+# 16  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
+# 17  sudo vi /opt/tomcat/latest/webapps/manager/META-INF/context.xml
+# 18  sudo vi /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml4
+
+# <Context antiResourceLocking="false" privileged="true" >
+# <!--
+#   <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+#          allow=".*" />
+# -->
+# </Context>
+
+# 19  sudo systemctl restart tomcat
+
+
+---
+- name: Installing tomcat10 in Ubuntu-22.04
+  hosts: all
+  become: yes
+  vars:
+    java_version: openjdk-11-jdk
+    user_name: tomcat
+    tomcat_home_path: /opt/tomcat
+    tomcat_user_shell: /bin/false
+    tomcat_download_url: "https://www-eu.apache.org/dist/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz"
+    tomcat_default_download_path: /tmp
+    tomcat_tar_file: apache-tomcat-10.1.26.tar.gz
+    tomcat_extracted_file: apache-tomcat-10.1.26
+    tomcat_service_file_control_node_location: /home/devops/ansible/tomcat/tomcat.service
+    tomcat_service_file_worker_node_location: /etc/systemd/system/tomcat.service
+    tomcat_users_xml_file_control_node_location: /home/devops/ansible/tomcat/users.xml
+    tomcat_users_xml_file_worker_node_location: /opt/tomcat/latest/conf/tomcat-users.xml
+    tomcat_manager_host_manager_xml_file_control_node_location: /home/devops/ansible/tomcat/manager-hostmanager.xml
+    tomcat_manager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
+    tomcat_hostmanager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml4
+  tasks:
+    - name: Installing Java-11
+      ansible.builtin.apt:
+        name:
+          - "{{ java_version }}"
+        update_cache: yes
+        state: present
+    
+    - name: Creating a User in /bin/false
+      ansible.builtin.user:
+        name: "{{ user_name }}"
+        home: "{{ tomcat_home_path }}"
+        shell: "{{ tomcat_user_shell }}"
+        create_home: yes
+    
+    - name: Downloading tomcat-10 tar file
+      ansible.builtin.get_url:
+        url: "{{ tomcat_download_url }}"
+        dest: "{{ tomcat_default_download_path }}"
+    
+      notify:
+        - Extracting the tomcat tar file in /opt/tomcat ditectory
+    
+    - name: Creating symbolic link
+      ansible.builtin.file:
+        src: "{{ tomcat_home_path }}"/"{{ tomcat_extracted_file }}"
+        dest: "{{ tomcat_home_path }}"/latest
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        state: link
+
+    - name: Changing ownership of /opt/tomcat folder to tomcat
+      ansible.builtin.file:
+        path: "{{ tomcat_home_path }}"
+        state: directory
+        recurse: yes
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: '0755'
+
+    - name: Giving permissions to shells files
+      ansible.builtin.shell:
+        cmd: "chmod +x /opt/tomcat/latest/bin/*.sh"
+        executable: "/bin/bash"
+
+    - name: Creating service file for tomcat
+      ansible.builtin.copy:
+        src: "{{ tomcat_service_file_control_node_location }}"
+        dest: "{{ tomcat_service_file_worker_node_location }}"
+
+    - name: Start and Enable Tomcat service
+      ansible.builtin.systemd_service :
+        daemon_reload : yes
+        enabled: yes
+        name: "{{ user_name }}"
+        state: "started"
+
+    - name: Creating users.xml
+      ansible.builtin.copy:
+        src: "{{ tomcat_users_xml_file_control_node_location }}"
+        dest: "{{ tomcat_users_xml_file_worker_node_location }}"
+
+    - name: Setting Managers.xml
+      ansible.builtin.copy:
+        src: "{{ tomcat_manager_host_manager_xml_file_control_node_location }}"
+        dest: "{{ tomcat_manager_xml_file_worker_node_location }}"
+
+    - name: Setting HostManagers.xml
+      ansible.builtin.copy:
+        src: "{{ tomcat_manager_host_manager_xml_file_control_node_location }}"
+        dest: "{{ tomcat_hostmanager_xml_file_worker_node_location }}"
+
+    - name: Restart Tomcat service
+      ansible.builtin.systemd_service :
+        daemon_reload : yes
+        enabled: yes
+        name: "{{ user_name }}"
+        state: "restarted"
+
+  handlers:
+    - name: Extracting the tomcat tar file in /opt/tomcat ditectory
+      ansible.builtin.unarchive:
+        dest: "{{ tomcat_home_path }}"/
+        src: "{{ tomcat_default_download_path }}"/"{{ tomcat_tar_file }}"
+        remote_src: yes
