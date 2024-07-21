@@ -27,6 +27,14 @@
 # </tomcat-users>
 # 16  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
 # 17  sudo vi /opt/tomcat/latest/webapps/manager/META-INF/context.xml
+
+# <Context antiResourceLocking="false" privileged="true" >
+# <!--
+#   <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+#          allow=".*" />
+# -->
+# </Context>
+
 # 18  sudo vi /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
 # 19  sudo systemctl restart tomcat
 
@@ -107,3 +115,20 @@
       ansible.builtin.copy:
         src: /home/devops/ansible/tomcat/users.xml
         dest: /opt/tomcat/latest/conf/tomcat-users.xml
+
+    - name: Setting Managers.xml
+      ansible.builtin.copy:
+        src: /home/devops/ansible/tomcat/manager-hostmanager.xml
+        dest: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
+
+    - name: Setting HostManagers.xml
+      ansible.builtin.copy:
+        src: /home/devops/ansible/tomcat/manager-hostmanager.xml
+        dest: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
+
+    - name: Restart Tomcat service
+      ansible.builtin.systemd_service :
+        daemon_reload : yes
+        enabled: yes
+        name: tomcat
+        state: "restarted"
