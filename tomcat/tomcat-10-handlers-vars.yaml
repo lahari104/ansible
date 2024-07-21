@@ -90,6 +90,7 @@
         state: link
       notify:
         - Changing ownership of /opt/tomcat folder to tomcat
+        - Changing ownership of /opt/tomcat/latest/bin folder to tomcat
         - Giving permissions to shells files
 
     - name: Creating service file for tomcat
@@ -139,6 +140,15 @@
     - name: Changing ownership of /opt/tomcat folder to tomcat
       ansible.builtin.file:
         path: "{{ tomcat_home_path }}"
+        state: directory
+        recurse: yes
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: '0755'
+
+    - name: Changing ownership of /opt/tomcat/latest/bin folder to tomcat
+      ansible.builtin.file:
+        path: "{{ tomcat_home_path }}/latest/bin"
         state: directory
         recurse: yes
         owner: "{{ user_name }}"
