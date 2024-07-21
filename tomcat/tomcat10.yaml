@@ -69,11 +69,16 @@
         group: tomcat
         mode: '0755'
 
-    - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        mode: "a+x"
-        remote_src: yes
-        recurse: yes
-      with_fileglob: 
-        - /opt/tomcat/latest/bin/*.sh
+    # - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
+    #   ansible.builtin.copy:
+    #     src: "{{ item }}"
+    #     mode: "a+x"
+    #     remote_src: yes
+    #     recurse: yes
+    #   with_fileglob: 
+    #     - /opt/tomcat/latest/bin/*.sh
+
+    - name: Giving permissions to shells files
+      ansible.builtin.shell:
+        cmd: "chmod +x /opt/tomcat/latest/bin/*.sh"
+        executable: "/bin/bash"
