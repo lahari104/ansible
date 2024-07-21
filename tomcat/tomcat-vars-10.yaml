@@ -56,7 +56,7 @@
     tomcat_users_xml_file_worker_node_location: /opt/tomcat/latest/conf/tomcat-users.xml
     tomcat_manager_host_manager_xml_file_control_node_location: /home/devops/ansible/tomcat/manager-hostmanager.xml
     tomcat_manager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
-    tomcat_hostmanager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml4
+    tomcat_hostmanager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
   tasks:
     - name: Installing Java-11
       ansible.builtin.apt:
