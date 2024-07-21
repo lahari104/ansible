@@ -57,6 +57,8 @@
     tomcat_manager_host_manager_xml_file_control_node_location: /home/devops/ansible/tomcat/manager-hostmanager.xml
     tomcat_manager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
     tomcat_hostmanager_xml_file_worker_node_location: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
+    jenkins_war_file_url: https://updates.jenkins.io/download/war/2.468/jenkins.war
+    jenkins_download_path: /opt/tomcat/latest/webapps/jenkins.war
   tasks:
     - name: Installing Java-11
       ansible.builtin.apt:
@@ -116,6 +118,13 @@
       ansible.builtin.copy:
         src: "{{ tomcat_manager_host_manager_xml_file_control_node_location }}"
         dest: "{{ tomcat_hostmanager_xml_file_worker_node_location }}"
+
+    - name: Download Jenkins War file
+      ansible.builtin.get_url:
+          url: "{{ jenkins_war_file_url }}"
+          dest: "{{ jenkins_download_path }}"
+          owner: "{{ user_name }}"
+          group: "{{ user_name }}"
       notify:
         - Restart Tomcat service
 
