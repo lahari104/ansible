@@ -48,10 +48,9 @@
     
     - name: Extracting the tomcat tar file in /opt/tomcat ditectory
       ansible.builtin.unarchive:
-        dest: /opt/tomcat
+        dest: /opt/tomcat/
         src: ./apache-tomcat-10.1.26.tar.gz
         remote_src: yes
-        mode: '0755'
     
     - name: Creating symbolic link
       ansible.builtin.file:
@@ -74,4 +73,4 @@
         src: "{{ item }}"
         mode: "+x"
       with_fileglob: 
-        - /opt/tomcat/latest/bin/*.sh 
+        - /opt/tomcat/latest/bin/*.sh
