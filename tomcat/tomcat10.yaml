@@ -5,6 +5,7 @@
 # 4  wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
 # 5  sudo tar -xzvf apache-tomcat-10.1.26.tar.gz -C /opt/tomcat/
 # 5  sudo tar -xzvf apache-tomcat-9.0.65.tar.gz -C /opt/tomcat/
+# 6  sudo chmod 777 /opt/tomcat/
 # 6  cd /opt/tomcat
 # 7  sudo ln -s apache-tomcat-9.0.65 /opt/tomcat/latest
 # 7  sudo ln -s apache-tomcat-10.1.26 /opt/tomcat/latest
@@ -47,17 +48,19 @@
     
     - name: Extracting the tomcat tar file in /opt/tomcat ditectory
       ansible.builtin.unarchive:
-        dest: /opt/tomcat
+        dest: /opt/tomcat/latest
         src: ./apache-tomcat-10.1.26.tar.gz
         remote_src: yes
+        mode: '777'
     
     - name: Creating symbolic link
       ansible.builtin.file:
-        src: apache-tomcat-10.1.26
+        src: /opt/tomcat/apache-tomcat-10.1.26
         dest: /opt/tomcat/latest
         owner: tomcat
         group: tomcat
         state: link
+        mode: '777'   
 
     - name: Changing ownership of /opt/tomcat folder to tomcat
       ansible.builtin.file:
@@ -65,15 +68,131 @@
         recurse: yes
         owner: tomcat
         group: tomcat
+        mode: '777'
 
     - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
       ansible.builtin.file:
-        path: "{{ item }}"
-        mode: "+X"
-        with_fileglob:
-          - /opt/tomcat/latest/bin/*.sh
+        path: /opt/tomcat/latest/bin/*.sh
+        mode: "+x"
+        recurse: yes
+        user: tomcat
+        group: tomcat
     
 
 
 
       
+
+
+
+
+
+
+
+
+# [Unit]
+# Description=Apache Tomcat 10 Web Application Server
+# After=network.target
+ 
+# [Service]
+# Type=forking
+ 
+# User=tomcat
+# Group=tomcat
+ 
+# Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+# Environment="CATALINA_HOME=/opt/tomcat/latest"
+# Environment="CATALINA_BASE=/opt/tomcat/latest"
+# Environment="CATALINA_PID=/opt/tomcat/latest/temp/tomcat.pid"
+# Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+ 
+# ExecStart=/opt/tomcat/latest/bin/startup.sh
+# ExecStop=/opt/tomcat/latest/bin/shutdown.sh
+ 
+# [Install]
+# WantedBy=multi-user.target
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ---
+# - name: Install and configure Tomcat 10
+#   hosts: all
+#   become: yes
+#   tasks:
+#     - name: Update apt package index
+#       ansible.builtin.apt:
+#         update_cache: yes
+    
+#     - name: Install Java 11
+#       ansible.builtin.apt:
+#         name: openjdk-11-jdk
+#         state: present
+
+#     - name: Create tomcat group
+#       ansible.builtin.group:
+#         name: tomcat
+#         state: present
+
+#     - name: Create tomcat user
+#       ansible.builtin.user:
+#         name: tomcat
+#         group: tomcat
+#         home: /opt/tomcat
+#         shell: /bin/false
+#         create_home: yes
+    
+#     - name: Download Tomcat 10
+#       ansible.builtin.get_url:
+#         url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+#         dest: /tmp/apache-tomcat-10.1.26.tar.gz
+    
+#     - name: Create tomcat directory
+#       ansible.builtin.file:
+#         path: /opt/tomcat
+#         state: directory
+#         owner: tomcat
+#         group: tomcat
+
+#     - name: Extract Tomcat
+#       ansible.builtin.unarchive:
+#         src: /tmp/apache-tomcat-10.1.26.tar.gz
+#         dest: /opt/tomcat
+#         remote_src: yes
+#         owner: tomcat
+#         group: tomcat
+
+#     - name: Create a symbolic link to the latest version
+#       ansible.builtin.file:
+#         src: /opt/tomcat/apache-tomcat-10.1.26
+#         dest: /opt/tomcat/latest
+#         state: link
+#         owner: tomcat
+#         group: tomcat
+    
+#     - name: Change permissions for /opt/tomcat directory
+#       ansible.builtin.file:
+#         path: /opt/tomcat
+#         mode: '0777'
+#         recurse: yes
+
+#     - name: Set execute permissions on Tomcat scripts
+#       ansible.builtin.find:
+#         paths: /opt/tomcat/latest/bin
+#         patterns: "*.sh"
+#         register: script_files
+
+#     - name: Apply execute permissions to Tomcat scripts
+#       ansible.builtin.file:
+#         path: "{{ item.path }}"
+#         mode: '0755'
+#       loop: "{{ script_files.files }}"
