@@ -17,6 +17,14 @@
 # 13  sudo systemctl start tomcat
 # 14  sudo systemctl status tomcat
 # 15  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
+# <tomcat-users>
+# <!--
+#     Comments
+# -->
+#    <role rolename="admin-gui"/>
+#    <role rolename="manager-gui"/>
+#    <user username="admin" password="tomcat_admin_password" roles="admin-gui,manager-gui"/>
+# </tomcat-users>
 # 16  sudo vi /opt/tomcat/latest/conf/tomcat-users.xml
 # 17  sudo vi /opt/tomcat/latest/webapps/manager/META-INF/context.xml
 # 18  sudo vi /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
@@ -85,9 +93,8 @@
 
     - name: Creating service file for tomcat
       ansible.builtin.copy:
-        src: /home/devops/ansible/tomcat/test.txt
+        src: /home/devops/ansible/tomcat/tomcat.service
         dest: /etc/systemd/system/tomcat.service
-        
 
     - name: Start and Enable Tomcat service
       ansible.builtin.systemd_service :
@@ -95,3 +102,8 @@
         enabled: yes
         name: tomcat
         state: "started"
+
+    - name: Creating users.xml
+      ansible.builtin.copy:
+        src: /home/devops/ansible/tomcat/users.xml
+        dest: /opt/tomcat/latest/conf/tomcat-users.xml
