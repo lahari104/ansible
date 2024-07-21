@@ -128,6 +128,12 @@
       notify:
         - Restart Tomcat service
 
+    - name: Ensure port 8080 is open in the firewall
+      ansible.builtin.ufw:
+        rule: allow
+        port: 8080
+        proto: tcp
+
     
   handlers:
     - name: Extracting the tomcat tar file in /opt/tomcat ditectory
