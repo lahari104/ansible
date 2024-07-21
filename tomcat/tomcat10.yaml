@@ -43,18 +43,18 @@
     
     - name: Downloading tomcat-10 tar file
       ansible.builtin.get_url:
-        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.4/bin/apache-tomcat-10.1.4.tar.gz
         dest: .
     
     - name: Extracting the tomcat tar file in /opt/tomcat ditectory
       ansible.builtin.unarchive:
         dest: /opt/tomcat/
-        src: ./apache-tomcat-10.1.26.tar.gz
+        src: ./apache-tomcat-10.1.4.tar.gz
         remote_src: yes
     
     - name: Creating symbolic link
       ansible.builtin.file:
-        src: /opt/tomcat/apache-tomcat-10.1.26
+        src: /opt/tomcat/apache-tomcat-10.1.4
         dest: /opt/tomcat/latest
         owner: tomcat
         group: tomcat
@@ -69,11 +69,11 @@
         group: tomcat
         mode: '0755'
 
-    - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        mode: "a+x"
-        remote_src: yes
-        recurse: yes
-      with_fileglob: 
-        - /opt/tomcat/latest/bin/*.sh
+    # - name: Giving execute permissions to all the shell files in /opt/tomcat/latest/bin folder
+    #   ansible.builtin.copy:
+    #     src: "{{ item }}"
+    #     mode: "a+x"
+    #     remote_src: yes
+    #     recurse: yes
+    #   with_fileglob: 
+    #     - /opt/tomcat/latest/bin/*.sh
