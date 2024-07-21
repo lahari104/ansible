@@ -127,12 +127,18 @@
           group: "{{ user_name }}"
       notify:
         - Restart Tomcat service
+    
+    - name: Ensure UFW is enabled
+      ansible.builtin.ufw:
+        state: enabled
 
     - name: Ensure port 8080 is open in the firewall
       ansible.builtin.ufw:
         rule: allow
         port: 8080
         proto: tcp
+      notify:
+        - Restart Tomcat service
 
     
   handlers:
