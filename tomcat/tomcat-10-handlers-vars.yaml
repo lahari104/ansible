@@ -78,7 +78,7 @@
         dest: "{{ tomcat_default_download_path }}"
       notify:
         - Extracting the tomcat tar file in /opt/tomcat ditectory
-        
+
     - name: Creating symbolic link
       ansible.builtin.file:
         src: "{{ tomcat_home_path }}/{{ tomcat_extracted_file }}"
@@ -86,20 +86,9 @@
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
         state: link
-
-    - name: Changing ownership of /opt/tomcat folder to tomcat
-      ansible.builtin.file:
-        path: "{{ tomcat_home_path }}"
-        state: directory
-        recurse: yes
-        owner: "{{ user_name }}"
-        group: "{{ user_name }}"
-        mode: '0755'
-
-    - name: Giving permissions to shells files
-      ansible.builtin.shell:
-        cmd: "chmod +x /opt/tomcat/latest/bin/*.sh"
-        executable: "/bin/bash"
+      notify:
+        - Changing ownership of /opt/tomcat folder to tomcat
+        - Giving permissions to shells files
 
     - name: Creating service file for tomcat
       ansible.builtin.copy:
@@ -127,6 +116,30 @@
       ansible.builtin.copy:
         src: "{{ tomcat_manager_host_manager_xml_file_control_node_location }}"
         dest: "{{ tomcat_hostmanager_xml_file_worker_node_location }}"
+      notify:
+        - Restart Tomcat service
+
+    
+  handlers:
+    - name: Extracting the tomcat tar file in /opt/tomcat ditectory
+      ansible.builtin.unarchive:
+        dest: "{{ tomcat_home_path }}/"
+        src: "{{ tomcat_default_download_path }}/{{ tomcat_tar_file }}"
+        remote_src: yes
+    
+    - name: Changing ownership of /opt/tomcat folder to tomcat
+      ansible.builtin.file:
+        path: "{{ tomcat_home_path }}"
+        state: directory
+        recurse: yes
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: '0755'
+
+    - name: Giving permissions to shells files
+      ansible.builtin.shell:
+        cmd: "chmod +x /opt/tomcat/latest/bin/*.sh"
+        executable: "/bin/bash"
 
     - name: Restart Tomcat service
       ansible.builtin.systemd_service :
@@ -134,10 +147,3 @@
         enabled: yes
         name: "{{ user_name }}"
         state: "restarted"
-
-  handlers:
-    - name: Extracting the tomcat tar file in /opt/tomcat ditectory
-      ansible.builtin.unarchive:
-        dest: "{{ tomcat_home_path }}/"
-        src: "{{ tomcat_default_download_path }}/{{ tomcat_tar_file }}"
-        remote_src: yes
