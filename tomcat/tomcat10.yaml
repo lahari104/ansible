@@ -87,7 +87,7 @@
       ansible.builtin.copy:
         src: ansible/tomcat/test.txt
         dest: /etc/systemd/system/tomcat.service
-        remote_src: no
+        remote_src: yes
 
     - name: Start and Enable Tomcat service
       ansible.builtin.systemd_service :
