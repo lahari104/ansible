@@ -144,7 +144,7 @@
         recurse: yes
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
-        mode: '0755'
+        mode: 'u+x'
 
     - name: Changing ownership of /opt/tomcat/latest/bin folder to tomcat
       ansible.builtin.file:
@@ -153,7 +153,7 @@
         recurse: yes
         owner: "{{ user_name }}"
         group: "{{ user_name }}"
-        mode: '0755'
+        mode: 'u+x'
 
     - name: Giving permissions to shells files
       ansible.builtin.shell:
