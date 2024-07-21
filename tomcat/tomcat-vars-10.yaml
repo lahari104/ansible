@@ -79,7 +79,7 @@
     
     - name: Extracting the tomcat tar file in /opt/tomcat ditectory
       ansible.builtin.unarchive:
-        dest: "{{ tomcat_home_path }}"/"{{ tomcat_tar_file }}"
+        dest: "{{ tomcat_home_path }}"/apache-tomcat-10.1.26.tar.gz
         src: "{{ tomcat_default_download_path }}"/"{{ tomcat_tar_file }}"
         remote_src: yes
     
